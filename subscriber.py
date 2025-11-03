@@ -1,12 +1,22 @@
 import zmq
-from constPS import * #-
+from constPS import *
 
 context = zmq.Context()
-s = context.socket(zmq.SUB)          # create a subscriber socket
-p = "tcp://"+ HOST +":"+ PORT        # how and where to communicate
-s.connect(p)                         # connect to the server
-s.setsockopt_string(zmq.SUBSCRIBE, "TIME")  # subscribe to TIME messages
+socket = context.socket(zmq.SUB)
+socket.connect(f"tcp://{HOST}:{PORT}")
 
-for i in range(5):  # Five iterations
-	time = s.recv()   # receive a message
-	print (bytes.decode(time))
+print("=== CHAT SUBSCRIBER ===")
+print("Digite o(s) grupo(s) que deseja assinar separados por vírgula")
+print("Ex: grupo1,avisos")
+
+topics = input("Assinar: ").split(",")
+
+for t in topics:
+    socket.setsockopt_string(zmq.SUBSCRIBE, t.strip())
+    print(f"✅ Assinado no tópico: {t.strip()}")
+
+print("\nAguardando mensagens...\n")
+
+while True:
+    msg = socket.recv_string()
+    print(f"📩 {msg}")
