@@ -1,11 +1,23 @@
-import zmq, time
-from constPS import * #-
+import zmq
+import time
+from constPS import *
 
 context = zmq.Context()
-s = context.socket(zmq.PUB)        # create a publisher socket
-p = "tcp://"+HOST+":"+ PORT      # how and where to communicate
-s.bind(p)                          # bind socket to the address
+socket = context.socket(zmq.PUB)
+socket.bind(f"tcp://{HOST}:{PORT}")
+
+print("=== CHAT PUBLISHER ===")
+print("Envie mensagens no formato:")
+print("[topico] mensagem")
+print("Ex: grupo1 Olá pessoal!")
+print("Tópicos sugeridos: grupo1, grupo2, avisos")
+
 while True:
-	time.sleep(5)                    # wait every 5 seconds
-	msg = str.encode("TIME " + time.asctime())
-	s.send(msg) # publish the current time
+    msg = input("> ")
+    if " " not in msg:
+        print("⚠ Formato inválido! Use: [topico] mensagem")
+        continue
+
+    topic, text = msg.split(" ", 1)
+    timestamp = time.strftime("%H:%M:%S")
+    socket.send_string(f"{topic} [{timestamp}] {text}")
